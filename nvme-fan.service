@@ -1,0 +1,14 @@
+[Unit]
+Description=NVMe Fan Control Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /home/pi/nvme-fan/nvme-fan.py
+WorkingDirectory=/home/pi/
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
