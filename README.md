@@ -104,6 +104,11 @@ This repository contains everything you need to control your NVMe fan on a Raspb
   sudo journalctl -u nvme-fan.service
  ```
 
+- **Temp check:**  
+  Use the following command to view the temp an sensor numbers:
+```
+nvme_fan_gui.sh
+```
 ---
 
 ### Unistall NVMe Fan Control
