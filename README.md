@@ -107,9 +107,11 @@ This repository contains everything you need to control your NVMe fan on a Raspb
 - **Temp check:**  
   Use the following command to view the temp an sensor numbers:
 ```
-nvme_fan_gui.sh
+sudo nvme smart-log /dev/nvme0 | grep -i temperature
 ```
+
 ---
+
 
 ### Unistall NVMe Fan Control
 
