@@ -10,7 +10,7 @@ sudo apt-get install -y python3 python3-gpiozero nvme-cli
 INSTALL_DIR=$(pwd)
 
 # Step 3: Set executable permissions for the script
-echo "Setting executable permissions for nvme-fan.py..."
+echo "Setting executable permissions for nvme-fan.py and nvme_fan_gui.sh ..."
 sudo chmod +x "$INSTALL_DIR/nvme-fan.py"
 sudo chmod +x "$INSTALL_DIR/nvme_fan_gui.sh"
 
