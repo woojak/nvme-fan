@@ -108,12 +108,12 @@ This repository contains everything you need to control your NVMe fan on a Raspb
 
 ### Unistall NVMe Fan Control
 
-2. Make it executable:
+1. To unistall NVme fan control make unistall script executable:
    ```bash
    cd nvme-fan/
    chmod +x uninstall_nvme_fan.sh
    ```
-3. Run the script with root privileges:
+2. Run the script with root privileges:
    ```bash
    sudo ./uninstall_nvme_fan.sh
    ```
