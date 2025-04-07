@@ -11,12 +11,16 @@ fan = OutputDevice(FAN_PIN)
 TEMP_ON = 50   # Temperature at which fan turns on
 TEMP_OFF = 45  # Temperature at which fan turns off
 
+# Sensor number for easy configuration
+SENSOR_NUMBER = 1
+
 def get_nvme_temperature():
     try:
-        # Execute nvme-cli command and read temperature from sensor 1
+        # Execute nvme-cli command and read temperature from the specified sensor
         result = subprocess.run(['nvme', 'smart-log', '/dev/nvme0'], capture_output=True, text=True)
+        sensor_identifier = f"Temperature Sensor {SENSOR_NUMBER}"
         for line in result.stdout.split('\n'):
-            if 'Temperature Sensor 1' in line:
+            if sensor_identifier in line:
                 # Extract temperature value (e.g. "32°C")
                 temp_match = re.search(r'(\d+)\s?°C', line)
                 if temp_match:
@@ -34,7 +38,7 @@ try:
             if temperature >= TEMP_ON and not fan_on:
                 fan.on()
                 fan_on = True
-                print("Fan ON ")
+                print("Fan ON")
             elif temperature <= TEMP_OFF and fan_on:
                 fan.off()
                 fan_on = False
