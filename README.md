@@ -143,8 +143,11 @@ Here's how it works and how you can adjust the settings:
 3. **Continuous Monitoring:**  
    The script operates in an infinite loop, checking the temperature every 10 seconds.
    It is designed to run as a systemd service so that it automatically starts at boot and keeps your system cool.
+   
+   ---
+   
 
-### Customizing Temperature Thresholds
+### Customizing Temperature Thresholds, GPIO pin and sensor number. 
 
 You can easily modify the temperature thresholds to suit your specific requirements:
 
@@ -162,6 +165,47 @@ You can easily modify the temperature thresholds to suit your specific requireme
   ```python
   TEMP_ON = 55
   TEMP_OFF = 50
+  ```
+
+  ```python
+  TEMP_ON = 50   # Temperature at which the fan turns on
+  TEMP_OFF = 45  # Temperature at which the fan turns off
+  ```
+  - **Save and Restart:**  
+  After modifying the file, save your changes and restart the NVMe Fan Control service to apply the new thresholds:
+
+  ```bash
+  sudo systemctl restart nvme-fan.service
+  ```
+
+- **Change GPIO pin:**  
+  Change GPIO pin to your desired number. For example, if you want the fan to turn on GPIO 18, update the constants as follows:
+
+  ```python
+  FAN_PIN = 14
+  ```
+  to
+    ```python
+  FAN_PIN = 18
+  ```
+
+- **Save and Restart:**  
+  After modifying the file, save your changes and restart the NVMe Fan Control service to apply the new thresholds:
+
+  ```bash
+  sudo systemctl restart nvme-fan.service
+  ```
+
+
+- **Change sensor number:**  
+  Change sensor number to your desired number. For example, if you want the fan to turn on based on sensor 2, update the constants as follows:
+
+  ```python
+  SENSOR_NUMBER = 1
+  ```
+  to
+    ```python
+  SENSOR_NUMBER = 2
   ```
 
 - **Save and Restart:**  
