@@ -1,3 +1,4 @@
+![PCB](https://github.com/woojak/nvme-fan/blob/main/PCB.png?raw=true)
 
 # NVMe Fan Control Installation Guide
 
