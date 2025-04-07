@@ -1,117 +1,152 @@
-import tkinter as tk
-from tkinter import messagebox
-import re
+#!/usr/bin/env python3
+import curses
 import subprocess
+import re
+import os
 
-CONFIG_FILE = "nvme-fan.py"  # Assumes nvme-fan.py is in the same directory
+# Define file paths (adjust if necessary)
+CONFIG_FILE = "nvme-fan.py"
+INSTALL_SCRIPT = "./install_nvme_fan.sh"
+UNINSTALL_SCRIPT = "./uninstall_nvme_fan.sh"
 
-def update_config():
+def get_current_value(pattern):
+    """
+    Reads the CONFIG_FILE and returns the first captured value from a matching line.
+    """
     try:
-        # Read current file content
-        with open(CONFIG_FILE, "r") as f:
+        with open(CONFIG_FILE, 'r') as f:
+            for line in f:
+                match = re.match(pattern, line)
+                if match:
+                    return match.group(1)
+    except Exception as e:
+        return None
+    return None
+
+def update_config(new_values):
+    """
+    Updates the CONFIG_FILE replacing values for FAN_PIN, TEMP_ON, TEMP_OFF, SENSOR_NUMBER.
+    """
+    try:
+        with open(CONFIG_FILE, 'r') as f:
             content = f.read()
-        
-        # Get new values from GUI entries
-        new_fan_pin = fan_pin_entry.get().strip()
-        new_temp_on = temp_on_entry.get().strip()
-        new_temp_off = temp_off_entry.get().strip()
-        new_sensor_number = sensor_number_entry.get().strip()
-        
-        # Replace values using regex (lines beginning with variable name)
-        content_new = re.sub(r"^(FAN_PIN\s*=\s*)(\d+)", r"\1" + new_fan_pin, content, flags=re.MULTILINE)
-        content_new = re.sub(r"^(TEMP_ON\s*=\s*)(\d+)", r"\1" + new_temp_on, content_new, flags=re.MULTILINE)
-        content_new = re.sub(r"^(TEMP_OFF\s*=\s*)(\d+)", r"\1" + new_temp_off, content_new, flags=re.MULTILINE)
-        content_new = re.sub(r"^(SENSOR_NUMBER\s*=\s*)(\d+)", r"\1" + new_sensor_number, content_new, flags=re.MULTILINE)
-        
-        with open(CONFIG_FILE, "w") as f:
-            f.write(content_new)
-        
-        messagebox.showinfo("Success", "Configuration updated successfully!")
+        content = re.sub(r'^(FAN_PIN\s*=\s*)\d+', r'\1' + str(new_values['FAN_PIN']), content, flags=re.MULTILINE)
+        content = re.sub(r'^(TEMP_ON\s*=\s*)\d+', r'\1' + str(new_values['TEMP_ON']), content, flags=re.MULTILINE)
+        content = re.sub(r'^(TEMP_OFF\s*=\s*)\d+', r'\1' + str(new_values['TEMP_OFF']), content, flags=re.MULTILINE)
+        content = re.sub(r'^(SENSOR_NUMBER\s*=\s*)\d+', r'\1' + str(new_values['SENSOR_NUMBER']), content, flags=re.MULTILINE)
+        with open(CONFIG_FILE, 'w') as f:
+            f.write(content)
+        return True
     except Exception as e:
-        messagebox.showerror("Error", f"Failed to update configuration: {e}")
+        return False
 
-def restart_service():
+def modify_parameters(stdscr):
+    curses.echo()
+    stdscr.clear()
+    stdscr.addstr("Modify Parameters\n\n")
+
+    # Get current values (or default if not found)
+    current_fan_pin = get_current_value(r'^FAN_PIN\s*=\s*(\d+)') or "14"
+    current_temp_on = get_current_value(r'^TEMP_ON\s*=\s*(\d+)') or "50"
+    current_temp_off = get_current_value(r'^TEMP_OFF\s*=\s*(\d+)') or "45"
+    current_sensor_number = get_current_value(r'^SENSOR_NUMBER\s*=\s*(\d+)') or "1"
+
+    stdscr.addstr(f"Current FAN_PIN ({current_fan_pin}): ")
+    fan_pin = stdscr.getstr().decode('utf-8').strip()
+    if fan_pin == "":
+        fan_pin = current_fan_pin
+
+    stdscr.addstr(f"Current TEMP_ON ({current_temp_on}): ")
+    temp_on = stdscr.getstr().decode('utf-8').strip()
+    if temp_on == "":
+        temp_on = current_temp_on
+
+    stdscr.addstr(f"Current TEMP_OFF ({current_temp_off}): ")
+    temp_off = stdscr.getstr().decode('utf-8').strip()
+    if temp_off == "":
+        temp_off = current_temp_off
+
+    stdscr.addstr(f"Current SENSOR_NUMBER ({current_sensor_number}): ")
+    sensor_number = stdscr.getstr().decode('utf-8').strip()
+    if sensor_number == "":
+        sensor_number = current_sensor_number
+
+    new_values = {
+        'FAN_PIN': int(fan_pin),
+        'TEMP_ON': int(temp_on),
+        'TEMP_OFF': int(temp_off),
+        'SENSOR_NUMBER': int(sensor_number)
+    }
+
+    if update_config(new_values):
+        stdscr.addstr("\nParameters updated successfully!\n")
+    else:
+        stdscr.addstr("\nError updating parameters!\n")
+    stdscr.addstr("Press any key to return to menu...")
+    stdscr.getch()
+    curses.noecho()
+
+def run_command(stdscr, command, message="Executing..."):
+    stdscr.clear()
+    stdscr.addstr(message + "\n")
+    stdscr.refresh()
     try:
-        subprocess.run(["sudo", "systemctl", "restart", "nvme-fan.service"], check=True)
-        messagebox.showinfo("Success", "Service restarted successfully!")
-    except Exception as e:
-        messagebox.showerror("Error", f"Failed to restart service: {e}")
+        subprocess.run(command, shell=True, check=True)
+        stdscr.addstr("\nDone.\n")
+    except subprocess.CalledProcessError as e:
+        stdscr.addstr("\nError executing command.\n")
+    stdscr.addstr("Press any key to return to menu...")
+    stdscr.getch()
 
-def start_service():
-    try:
-        subprocess.run(["sudo", "systemctl", "start", "nvme-fan.service"], check=True)
-        messagebox.showinfo("Success", "Service started successfully!")
-    except Exception as e:
-        messagebox.showerror("Error", f"Failed to start service: {e}")
+def main_menu(stdscr):
+    curses.curs_set(0)
+    menu = [
+        "Modify Parameters", 
+        "Reset/Restart Service", 
+        "Enable/Start Service", 
+        "Install Service", 
+        "Uninstall Service", 
+        "Quit"
+    ]
+    current_row = 0
 
-def install_service():
-    try:
-        subprocess.run(["sudo", "./install_nvme_fan.sh"], check=True)
-        messagebox.showinfo("Success", "Service installed successfully!")
-    except Exception as e:
-        messagebox.showerror("Error", f"Failed to install service: {e}")
+    while True:
+        stdscr.clear()
+        stdscr.addstr("NVMe Fan Control GUI\n", curses.A_BOLD | curses.A_UNDERLINE)
+        stdscr.addstr("Use arrow keys to navigate and press Enter to select.\n\n")
 
-def uninstall_service():
-    try:
-        subprocess.run(["sudo", "./uninstall_nvme_fan.sh"], check=True)
-        messagebox.showinfo("Success", "Service uninstalled successfully!")
-    except Exception as e:
-        messagebox.showerror("Error", f"Failed to uninstall service: {e}")
+        for idx, item in enumerate(menu):
+            if idx == current_row:
+                stdscr.addstr(f"> {item}\n", curses.A_REVERSE)
+            else:
+                stdscr.addstr(f"  {item}\n")
 
-# Create main window
-root = tk.Tk()
-root.title("NVMe Fan Control Configuration")
+        key = stdscr.getch()
+        if key == curses.KEY_UP and current_row > 0:
+            current_row -= 1
+        elif key == curses.KEY_DOWN and current_row < len(menu) - 1:
+            current_row += 1
+        elif key in [10, 13]:
+            if menu[current_row] == "Modify Parameters":
+                modify_parameters(stdscr)
+            elif menu[current_row] == "Reset/Restart Service":
+                run_command(stdscr, "sudo systemctl restart nvme-fan.service", "Restarting service...")
+            elif menu[current_row] == "Enable/Start Service":
+                run_command(stdscr, "sudo systemctl enable nvme-fan.service && sudo systemctl start nvme-fan.service", "Enabling and starting service...")
+            elif menu[current_row] == "Install Service":
+                run_command(stdscr, f"sudo {INSTALL_SCRIPT}", "Running install script...")
+            elif menu[current_row] == "Uninstall Service":
+                run_command(stdscr, f"sudo {UNINSTALL_SCRIPT}", "Running uninstall script...")
+            elif menu[current_row] == "Quit":
+                break
 
-# Create labels and entries for parameters
-tk.Label(root, text="FAN_PIN:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
-fan_pin_entry = tk.Entry(root)
-fan_pin_entry.grid(row=0, column=1, padx=5, pady=5)
+    stdscr.clear()
+    stdscr.addstr("Goodbye!\n")
+    stdscr.refresh()
+    curses.napms(1000)
 
-tk.Label(root, text="TEMP_ON:").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
-temp_on_entry = tk.Entry(root)
-temp_on_entry.grid(row=1, column=1, padx=5, pady=5)
+def main():
+    curses.wrapper(main_menu)
 
-tk.Label(root, text="TEMP_OFF:").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
-temp_off_entry = tk.Entry(root)
-temp_off_entry.grid(row=2, column=1, padx=5, pady=5)
-
-tk.Label(root, text="SENSOR_NUMBER:").grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
-sensor_number_entry = tk.Entry(root)
-sensor_number_entry.grid(row=3, column=1, padx=5, pady=5)
-
-# Buttons for configuration and service control
-update_button = tk.Button(root, text="Update Configuration", command=update_config)
-update_button.grid(row=4, column=0, columnspan=2, pady=10)
-
-restart_button = tk.Button(root, text="Restart Service", command=restart_service)
-restart_button.grid(row=5, column=0, columnspan=2, pady=5)
-
-start_button = tk.Button(root, text="Start Service", command=start_service)
-start_button.grid(row=6, column=0, columnspan=2, pady=5)
-
-install_button = tk.Button(root, text="Install Service", command=install_service)
-install_button.grid(row=7, column=0, columnspan=2, pady=5)
-
-uninstall_button = tk.Button(root, text="Uninstall Service", command=uninstall_service)
-uninstall_button.grid(row=8, column=0, columnspan=2, pady=5)
-
-# Pre-fill the entry fields with current values from nvme-fan.py
-try:
-    with open(CONFIG_FILE, "r") as f:
-        content = f.read()
-        fan_pin_match = re.search(r"^FAN_PIN\s*=\s*(\d+)", content, re.MULTILINE)
-        temp_on_match = re.search(r"^TEMP_ON\s*=\s*(\d+)", content, re.MULTILINE)
-        temp_off_match = re.search(r"^TEMP_OFF\s*=\s*(\d+)", content, re.MULTILINE)
-        sensor_number_match = re.search(r"^SENSOR_NUMBER\s*=\s*(\d+)", content, re.MULTILINE)
-        if fan_pin_match:
-            fan_pin_entry.insert(0, fan_pin_match.group(1))
-        if temp_on_match:
-            temp_on_entry.insert(0, temp_on_match.group(1))
-        if temp_off_match:
-            temp_off_entry.insert(0, temp_off_match.group(1))
-        if sensor_number_match:
-            sensor_number_entry.insert(0, sensor_number_match.group(1))
-except Exception as e:
-    messagebox.showerror("Error", f"Error reading configuration from file: {e}")
-
-root.mainloop()
+if __name__ == "__main__":
+    main()
