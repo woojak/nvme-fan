@@ -229,20 +229,6 @@ You can easily modify the temperature thresholds to suit your specific requireme
   The script prints temperature readings and status messages to the console.
   You can redirect or expand this logging functionality if needed for your monitoring or troubleshooting purposes.
 
-### Visual Overview
-
-```
-       ┌─────────────────────────────────────────┐
-       │     NVMe Fan Control Script             │
-       ├─────────────────────────────────────────┤
-       │ Read NVMe temperature sensor data       │
-       │    ↓                                    │
-       │ Parse temperature from output           │
-       │    ↓                                    │
-       │ If temperature ≥ TEMP_ON → Turn on fan  │
-       │ If temperature ≤ TEMP_OFF → Turn off fan│
-       └─────────────────────────────────────────┘
-```
 
 By adjusting these parameters, you can tailor the script’s behavior to best suit your cooling needs and NVMe drive specifications. 
 Enjoy the enhanced cooling management and feel free to further customize the script for your specific application! 😎❄️
