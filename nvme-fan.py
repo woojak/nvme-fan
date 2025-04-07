@@ -30,11 +30,11 @@ try:
     while True:
         temperature = get_nvme_temperature()
         if temperature is not None:
-            print(f"Aktualna temperatura NVMe: {temperature}°C")
+            print(f"Current NVMe temperature: {temperature}°C")
             if temperature >= TEMP_ON and not fan_on:
                 fan.on()
                 fan_on = True
-                print("Fan ON")
+                print("Fan ON ")
             elif temperature <= TEMP_OFF and fan_on:
                 fan.off()
                 fan_on = False
