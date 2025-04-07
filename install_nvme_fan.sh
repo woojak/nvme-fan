@@ -12,6 +12,7 @@ INSTALL_DIR=$(pwd)
 # Step 3: Set executable permissions for the script
 echo "Setting executable permissions for nvme-fan.py..."
 sudo chmod +x "$INSTALL_DIR/nvme-fan.py"
+sudo chmod +x "$INSTALL_DIR/nvme_fan_gui.sh"
 
 # Step 4: Install the systemd service file
 echo "Copying the service file to /etc/systemd/system/ ..."
