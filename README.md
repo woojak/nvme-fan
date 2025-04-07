@@ -79,32 +79,53 @@ This repository contains everything you need to control your NVMe fan on a Raspb
 
 ---
 
+
 ## Troubleshooting Tips
 
 - **GPIO Busy Issues:**  
   If you run into errors about GPIO pins being busy, verify that no other processes are using the pins. You can use:
-  ```bash
-  sudo apt-get install gpiod
-  gpioinfo
-  ```
+```
+  sudo lsof /dev/gpiochip*
+```
   This will list all currently used GPIO pins.
+
+  Them kill process
+```
+  sudo fuser -k /dev/gpiochip0
+```
+
 
 - **Service Logs:**  
   Use the following command to view the logs and troubleshoot any issues:
-  ```bash
+
+
+ ```bash
   sudo journalctl -u nvme-fan.service
-  ```
+ ```
 
 ---
 
-Enjoy your project and happy cooling! 😎👍
+### Unistall NVMe Fan Control
 
-----------------------------------------------------------------------------------------
+2. Make it executable:
+   ```bash
+   cd nvme-fan/
+   chmod +x uninstall_nvme_fan.sh
+   ```
+3. Run the script with root privileges:
+   ```bash
+   sudo ./uninstall_nvme_fan.sh
+   ```
 
+The script stops and disables the service, removes the systemd service file, and reloads the systemd daemon. 
+Then it prompts you to decide whether the repository directory (`/home/pi/nvme-fan`) should be deleted.
+
+---
 
 ## Operation and Temperature Customization
 
-The **NVMe Fan Control** script is designed to continuously monitor the temperature of your NVMe drive and automatically control a cooling fan based on configurable thresholds. 
+The **NVMe Fan Control** script is designed to continuously monitor the temperature of your NVMe drive and automatically control a cooling fan 
+based on configurable thresholds. 
 Here's how it works and how you can adjust the settings:
 
 ### How It Works
@@ -113,11 +134,14 @@ Here's how it works and how you can adjust the settings:
    The script uses the `nvme smart-log` command to fetch temperature data from the NVMe drive. It parses the output to extract the temperature value from "Temperature Sensor 1".  
 
 2. **Fan Control Logic:**  
-   - **Fan Activation:** When the temperature reaches or exceeds the **activation threshold** (by default, `TEMP_ON = 50°C`), the script turns the fan on.
-   - **Fan Deactivation:** When the temperature drops to or below the **deactivation threshold** (by default, `TEMP_OFF = 45°C`), the script turns the fan off.
+   - **Fan Activation:** When the temperature reaches or exceeds the **activation threshold**
+   - (by default, `TEMP_ON = 50°C`), the script turns the fan on.
+   - **Fan Deactivation:** When the temperature drops to or below the **deactivation threshold**
+   - (by default, `TEMP_OFF = 45°C`), the script turns the fan off.
 
 3. **Continuous Monitoring:**  
-   The script operates in an infinite loop, checking the temperature every 10 seconds. It is designed to run as a systemd service so that it automatically starts at boot and keeps your system cool.
+   The script operates in an infinite loop, checking the temperature every 10 seconds.
+   It is designed to run as a systemd service so that it automatically starts at boot and keeps your system cool.
 
 ### Customizing Temperature Thresholds
 
@@ -149,30 +173,33 @@ You can easily modify the temperature thresholds to suit your specific requireme
 ### Additional Customization Options
 
 - **Polling Interval:**  
-  The script checks the temperature every 10 seconds (using `time.sleep(10)`). If you wish to change this interval, locate the following line in the script and adjust the number of seconds:
+  The script checks the temperature every 10 seconds (using `time.sleep(10)`).
+  If you wish to change this interval, locate the following line in the script and adjust the number of seconds:
 
   ```python
   time.sleep(10)
   ```
 
 - **Log Output:**  
-  The script prints temperature readings and status messages to the console. You can redirect or expand this logging functionality if needed for your monitoring or troubleshooting purposes.
+  The script prints temperature readings and status messages to the console.
+  You can redirect or expand this logging functionality if needed for your monitoring or troubleshooting purposes.
 
 ### Visual Overview
 
 ```
-       ┌─────────────────────────────────────┐
-       │     NVMe Fan Control Script         │
-       ├─────────────────────────────────────┤
-       │ Read NVMe temperature sensor data   │
-       │    ↓                                │
-       │ Parse temperature from output       │
-       │    ↓                                │
-       │ If temperature ≥ TEMP_ON → Turn on fan│
+       ┌─────────────────────────────────────────┐
+       │     NVMe Fan Control Script             │
+       ├─────────────────────────────────────────┤
+       │ Read NVMe temperature sensor data       │
+       │    ↓                                    │
+       │ Parse temperature from output           │
+       │    ↓                                    │
+       │ If temperature ≥ TEMP_ON → Turn on fan  │
        │ If temperature ≤ TEMP_OFF → Turn off fan│
-       └─────────────────────────────────────┘
+       └─────────────────────────────────────────┘
 ```
 
-By adjusting these parameters, you can tailor the script’s behavior to best suit your cooling needs and NVMe drive specifications. Enjoy the enhanced cooling management and feel free to further customize the script for your specific application! 😎❄️
+By adjusting these parameters, you can tailor the script’s behavior to best suit your cooling needs and NVMe drive specifications. 
+Enjoy the enhanced cooling management and feel free to further customize the script for your specific application! 😎❄️
 
 ---
