@@ -2,9 +2,10 @@
 # NVMe Fan Control installation script (without fetching the repository)
 
 # Step 1: Install required packages
-echo "Installing packages: python3, python3-gpiozero, nvme-cli..."
+echo "Installing packages: python3, python3-gpiozero, nvme-cli,dialog.."
 sudo apt-get update
-sudo apt-get install -y python3 python3-gpiozero nvme-cli
+sudo apt-get install -y python3 python3-gpiozero nvme-cli dialog
+
 
 # Step 2: Set the installation directory (assuming the repository is located in the current directory)
 INSTALL_DIR=$(pwd)
