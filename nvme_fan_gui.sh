@@ -156,4 +156,4 @@ while true; do
 done
 
 clear
-echo "Exiting NVMe Fan Control Menu. Goodbye! 😊"
+echo "Exiting NVMe Fan Control Menu. Goodbye!"
