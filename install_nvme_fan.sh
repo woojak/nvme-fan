@@ -27,5 +27,13 @@ sudo systemctl enable nvme-fan.service
 echo "Starting nvme-fan service..."
 sudo systemctl start nvme-fan.service
 
-echo "Installation completed. Check service status with:"
-echo "  sudo systemctl status nvme-fan.service"
+# Step 6: Ask the user if they want to run the nvme_fan_gui.sh script
+read -p "Would you like to run nvme_fan_gui.sh now? (y/N): " run_gui
+if [[ "$run_gui" == "y" || "$run_gui" == "Y" ]]; then
+    echo "Launching nvme_fan_gui.sh..."
+    sudo ./nvme_fan_gui.sh
+else
+    echo "nvme_fan_gui.sh was not launched."
+fi
+
+echo "Installation script finished."
