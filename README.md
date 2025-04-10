@@ -24,7 +24,7 @@ This repository contains everything you need to control your NVMe fan on a Raspb
 
    Open a terminal and run:
    ```bash
-   git clone https://github.com/woojak/nvme-fan.git
+   sudo git clone https://github.com/woojak/nvme-fan.git
    cd nvme-fan
    ```
    > *If you already have the repository on your device, you can skip this step.*
